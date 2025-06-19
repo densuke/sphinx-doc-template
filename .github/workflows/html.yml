@@ -1,0 +1,87 @@
+# Sphinxを用いたドキュメントのビルド
+
+# 発火対象は以下とする
+# - mainブランチのsources以下へのコミット(プッシュ)
+# - mainブランチへのプルリクエストのマージ
+# - 手動
+
+# ただし、手動での発火は、workflow_dispatchを指定する必要がある
+# そのため、手動での発火は、workflow_dispatchを指定する必要がある
+name: Build Sphinx Documentation
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+    paths:
+      - 'sources/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# 複数回actionsが動かないようにする
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      # リリース時のバージョンを設定する
+      # タグにより本アクションが発火した場合はタグ名がリリースバージョンとなる
+      # mainブランチがタグと無関係に発火した場合はlatestとする
+      # バージョンはsource/conf.pyに記載する
+      - name: build HTML docs
+        run: |
+          # install uv
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          # add PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          
+          # リリース情報を設定
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            RELEASE="${{ github.ref_name }}"
+          else
+            # ブランチ名を取得
+            BRANCH_NAME="${{ github.ref_name }}"
+            # コミットIDの先頭7桁を取得
+            COMMIT_ID="${{ github.sha }}"
+            SHORT_COMMIT="${COMMIT_ID:0:7}"
+            RELEASE="${BRANCH_NAME}-${SHORT_COMMIT}"
+          fi
+          echo "RELEASE=$RELEASE" >> $GITHUB_ENV
+          
+          # conf.pyのリリース情報を更新
+          if [ -f sources/conf.py ]; then
+            # releaseが存在する場合は更新、存在しない場合は追加
+            if grep -q "^release\s*=" sources/conf.py; then
+              sed -i "s/^release\s*=.*$/release = \"${RELEASE}\"/" sources/conf.py
+            else
+              # ファイル末尾に追加
+              echo -e "\n# リリースバージョン\nrelease = \"${RELEASE}\"" >> sources/conf.py
+            fi
+          fi
+          
+          make clean html
+      - name: setup GitHub Pages
+        if: ${{ !env.ACT }}
+        uses: actions/configure-pages@v5
+      - name: upload Artifact(build/html)
+        if: ${{ !env.ACT }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+            path: build/html
+      - name: Deploy to GitHub Pages
+        if: ${{ !env.ACT }}
+        uses: actions/deploy-pages@v4

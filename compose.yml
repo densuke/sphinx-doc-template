@@ -1,0 +1,15 @@
+services:
+  app:
+    # build:
+    #   context: docker
+    #   dockerfile: Dockerfile
+    image: ghcr.io/densuke/sphinx-texlive:20250615120618
+
+    #user: worker
+    volumes:
+      - .:/app:cached
+    ports:
+      - 8000
+    environment:
+      PATH: /app/node_modules/.bin:$PATH
+      
