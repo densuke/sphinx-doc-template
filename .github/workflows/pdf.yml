@@ -79,22 +79,22 @@ jobs:
           docker compose $COMPOSE_FILES cp app:/tmp/app/build/latex/network2025.pdf ./build/latex/
           # コンテナを停止する
           docker compose $COMPOSE_FILES down --remove-orphans
-      - name: upload PDF as Artifact
-        if: ${{ !env.ACT }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: doc-pdf
-          path: build/latex/*.pdf
-      # リリース処理: 本ファイル冒頭のルールに従い、リリースバージョンを設定する
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        if: ${{ !env.ACT }} && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        with:
-          tag_name: ${{ (github.ref_type == 'tag') && github.ref_name || 'latest' }}
-          # release_name: ${{ (github.ref_type == 'tag') && github.ref || 'latest' }}
-          files: build/latex/*.pdf
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: upload PDF as Artifact
+      #   if: ${{ !env.ACT }}
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: doc-pdf
+      #     path: build/latex/*.pdf
+      # # リリース処理: 本ファイル冒頭のルールに従い、リリースバージョンを設定する
+      # - name: Create Release
+      #   id: create_release
+      #   uses: softprops/action-gh-release@v2
+      #   if: ${{ !env.ACT }} && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      #   with:
+      #     tag_name: ${{ (github.ref_type == 'tag') && github.ref_name || 'latest' }}
+      #     # release_name: ${{ (github.ref_type == 'tag') && github.ref || 'latest' }}
+      #     files: build/latex/*.pdf
+      #     draft: false
+      #     prerelease: false
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -74,14 +74,14 @@ jobs:
           fi
           
           make clean html
-      - name: setup GitHub Pages
-        if: ${{ !env.ACT }}
-        uses: actions/configure-pages@v5
-      - name: upload Artifact(build/html)
-        if: ${{ !env.ACT }}
-        uses: actions/upload-pages-artifact@v3
-        with:
-            path: build/html
-      - name: Deploy to GitHub Pages
-        if: ${{ !env.ACT }}
-        uses: actions/deploy-pages@v4
+      # - name: setup GitHub Pages
+      #   if: ${{ !env.ACT }}
+      #   uses: actions/configure-pages@v5
+      # - name: upload Artifact(build/html)
+      #   if: ${{ !env.ACT }}
+      #   uses: actions/upload-pages-artifact@v3
+      #   with:
+      #       path: build/html
+      # - name: Deploy to GitHub Pages
+      #   if: ${{ !env.ACT }}
+      #   uses: actions/deploy-pages@v4
