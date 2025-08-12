@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       # リリース時のバージョンを設定する
       # タグにより本アクションが発火した場合はタグ名がリリースバージョンとなる
       # mainブランチがタグと無関係に発火した場合はlatestとする
